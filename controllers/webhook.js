@@ -34,10 +34,7 @@ const verifyWebhook = (req, res) => {
         if(token && mode) {
             if(token === VERIFY_TOKEN && mode === 'subscribe') {
                 logger.info('WEBHOOK_VERIFIED');
-                res.status(200).json({
-                    message: 'Success',
-                    data: challenge
-                })
+                res.status(200).send(challenge);
             } else {
                 // return forbidden if verify tokens don't match
                 res.sendStatus(403);
