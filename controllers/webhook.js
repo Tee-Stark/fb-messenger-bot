@@ -1,5 +1,4 @@
-const postBackProcess = require('../processes/postback');
-const messageProcess = require('../processes/message.js');
+// const messageProcess = require('../processes/message.js');
 const logger = require('../config/logger');
 const { VERIFY_TOKEN } = require('../config/constants');
 
@@ -11,6 +10,9 @@ const webhook = async (req, res) => {
             body.entry.forEach(entry => {
                 let webhook_event = entry.messaging[0];
                 console.log(webhook_event);
+                // if(webhook_event.message) {
+                //     messageProcess(webhook_event);
+                // }
             });
             return res.status(200).send('EVENT_RECEIVED');
         } else {
@@ -50,5 +52,6 @@ const verifyWebhook = (req, res) => {
 }
 
 module.exports = {
+    webhook,
     verifyWebhook
 }
