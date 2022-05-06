@@ -1,6 +1,8 @@
-const { verifyWebhook } = require('../controllers/webhook')
+const { verifyWebhook, webhook } = require('../controllers/webhook')
 
 module.exports = async (app) => {
     // Creates the endpoint for our webhook 
-    app.post('/webhook', verifyWebhook);
+    app.get('/webhook', verifyWebhook);
+    // verify webhook
+    // app.post('/webhook', webhook);
 }
