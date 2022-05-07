@@ -12,10 +12,6 @@ const userSchema = new mongoose.Schema({
     birthday: {
         type: String,
     },
-    messages: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Message',
-    }],
     created_at: {
         type: Date,
         default: Date.now,

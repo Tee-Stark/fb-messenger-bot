@@ -3,6 +3,7 @@ const logger = require("../config/logger");
 const { isDate } = require("../utils/dateUtil");
 const { sendMessage, typingAction } = require("../utils/sendMessage");
 const { nextBirthday } = require("../utils/birthday");
+const { createUser, addBirthday, getBirthday } = require("../services/User");
 const { PAGE_ACCESS_TOKEN } = require("../config/constants");
 
 let yesReplies = [
@@ -28,12 +29,11 @@ let noReplies = [
 
 module.exports = messageProcess = async (sender_id, message) => {
     try {
-            var text, days;
+            let text, days;
             logger.info(`Message received from ${sender_id}`);
             logger.info(message);
             if(message.text) {
                 text = message.text.toLowerCase();
-                
                 if(text === 'hi' || text === 'hello') {
                     request({
                         url: `https://graph.facebook.com/v13.0/${sender_id}`,
@@ -52,6 +52,8 @@ module.exports = messageProcess = async (sender_id, message) => {
                             await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });  
                         }
                         const user = JSON.parse(body);
+                        const userSaved = await createUser(sender_id, user.first_name);
+                        logger.info(userSaved);
                         welcomeMessage = `Hi ${user.first_name}! I\'m your friendly neighborhood birthday bot🧁🎂 .\n
                                           I can help you find out how many days until your next birthday. Let\'s Go!.`;
                         let questionOne = {
@@ -71,12 +73,15 @@ module.exports = messageProcess = async (sender_id, message) => {
                 }
                 else if(isDate(text)) {
                     birthday = message.text;
-                    days = nextBirthday(birthday);
+                    const birthdaySaved = await addBirthday(sender_id, birthday);
+                    logger.info(birthdaySaved);
                     typingAction(sender_id);
                     await sendMessage(sender_id, { text:'Would you like to know how many days until your next birthday?' });
                 }
                 else if(yesReplies.includes(text)) {
                     typingAction(sender_id);
+                    days = await getBirthday(sender_id);
+                    days = nextBirthday(days);
                     if(days !== -1) {
                         typingAction(sender_id);
                         await sendMessage(sender_id, { text: days === 0 ? 
