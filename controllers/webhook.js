@@ -10,16 +10,17 @@ const webhook = async (req, res) => {
             body.entry.forEach(entry => {
                 let webhook_event = entry.messaging;
                 console.log(webhook_event);
-                webhook_event.forEach(event => {
+                webhook_event.forEach( async (event) => {
                     // Get the sender PSID
                     let sender_psid = event.sender.id;
                     // Check if the event is a message or postback
                     if (event.message && event.message.text) {
                         // Handle message
                         await messageProcess(sender_psid, event.message);
-                    } else if (event.postback && event.postback.payload) {
-                        // Handle postback
-                        // messageProcess(sender_psid, event.postback);
+                    // } else if (event.postback && event.postback.payload) {
+                    //     // Handle postback
+                    //     // messageProcess(sender_psid, event.postback);
+                    // }
                     }
                 }
                 );
