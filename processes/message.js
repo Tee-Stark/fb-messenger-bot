@@ -38,6 +38,10 @@ module.exports = messageProcess = async (_event) => {
                 await sendMessage(sender_id, { text:'Would you like to know how many days until your next birthday?' });
             }  
             if(message.text) {  
+                if(message.text.toLowerCase() === 'hi' || message.text.toLowerCase() === 'hello') {
+                    typingAction(sender_id);
+                    await sendMessage(sender_id, { text:'Hi there! I\'m your friendly neighborhood birthday bot. I can help you find out how many days until your next birthday. Just say the date of your birthday in the format of MM/DD/YYYY.' });
+                }
                 if(yesReplies.includes(message.text.toLowerCase())) {
                     typingAction(sender_id);
                     days = nextBirthday(birthday);
