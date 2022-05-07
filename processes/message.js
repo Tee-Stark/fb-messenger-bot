@@ -3,6 +3,7 @@ const logger = require("../config/logger");
 const { isDate } = require("../utils/dateUtil");
 const { sendMessage, typingAction } = require("../utils/sendMessage");
 const { nextBirthday } = require("../utils/birthday");
+const { PAGE_ACCESS_TOKEN } = require("../config/constants");
 
 let yesReplies = [
     'yes',
