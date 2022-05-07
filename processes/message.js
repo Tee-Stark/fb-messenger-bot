@@ -1,3 +1,4 @@
+const request = require('request');
 const logger = require("../config/logger");
 const { isDate } = require("../utils/dateUtil");
 const { sendMessage, typingAction } = require("../utils/sendMessage");
