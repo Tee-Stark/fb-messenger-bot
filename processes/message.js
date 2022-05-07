@@ -5,6 +5,7 @@ const { sendMessage, typingAction } = require("../utils/sendMessage");
 const { nextBirthday } = require("../utils/birthday");
 const { createUser, getUser, addBirthday, getBirthday } = require("../services/User");
 const { PAGE_ACCESS_TOKEN } = require("../config/constants");
+const { create } = require('../models/user');
 
 let yesReplies = [
     'yes',
@@ -52,16 +53,16 @@ module.exports = messageProcess = async (sender_id, message) => {
                             await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });  
                         }
                         const user = JSON.parse(body);
-                        const userSaved = await createUser(sender_id, user.first_name);
-                        if(!userSaved) {
-                            let userExists = await getUser(sender_id);
-                            if(!userExists) {
+                        let userExists;
+                        userExists = await getUser(sender_id);
+                        if(!userExists) {
+                            let userSaved = await createUser(sender_id, user.first_name);
+                            if(!userSaved) {
                                 await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });
-                            } else {
-                                userSaved = userExists;
                             }
+                            userExists = userSaved;
                         }
-                        logger.info(userSaved);
+                        logger.info(userExists);
                         welcomeMessage = `Hi ${user.first_name}! I\'m your friendly neighborhood birthday bot🧁🎂 .\n
                                           I can help you find out how many days until your next birthday. Let\'s Go!.`;
                         let questionOne = {
