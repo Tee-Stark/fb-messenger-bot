@@ -3,7 +3,7 @@ const logger = require("../config/logger");
 const { isDate } = require("../utils/dateUtil");
 const { sendMessage, typingAction } = require("../utils/sendMessage");
 const { nextBirthday } = require("../utils/birthday");
-const { createUser, addBirthday, getBirthday } = require("../services/User");
+const { createUser, getUser, addBirthday, getBirthday } = require("../services/User");
 const { PAGE_ACCESS_TOKEN } = require("../config/constants");
 
 let yesReplies = [
@@ -53,6 +53,14 @@ module.exports = messageProcess = async (sender_id, message) => {
                         }
                         const user = JSON.parse(body);
                         const userSaved = await createUser(sender_id, user.first_name);
+                        if(!userSaved) {
+                            let userExists = await getUser(sender_id);
+                            if(!userExists) {
+                                await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });
+                            } else {
+                                userSaved = userExists;
+                            }
+                        }
                         logger.info(userSaved);
                         welcomeMessage = `Hi ${user.first_name}! I\'m your friendly neighborhood birthday bot🧁🎂 .\n
                                           I can help you find out how many days until your next birthday. Let\'s Go!.`;

@@ -12,6 +12,15 @@ const createUser = async (fb_id, first_name) => {
     }
 }
 
+const getUser = async (fb_id) => {
+    try {
+        const user = await User.findOne({ fb_id });
+        return user;
+    } catch (error) {
+        throw error;
+    }
+}
+
 const addBirthday = async (fb_id, birthday) => {
     try {
         const user = await User.findOneAndUpdate({ fb_id }, { birthday }, { new: true,});
@@ -32,6 +41,7 @@ const getBirthday = async (fb_id) => {
 
 module.exports = {
     createUser,
+    getUser,
     addBirthday,
     getBirthday
 }

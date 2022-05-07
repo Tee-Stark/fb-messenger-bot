@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
     fb_id: {
         type: String,
         required: true,
+        unique: true
     },
     first_name: {
         type: String,
