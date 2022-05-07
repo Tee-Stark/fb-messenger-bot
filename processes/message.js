@@ -44,10 +44,10 @@ module.exports = messageProcess = async (sender_id, message) => {
                         let welcomeMessage = '';
                         if (error) {
                             logger.error(error)
-                            break;
+                            await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });
                         } else if (response.body.error) {
                             logger.error(response.body.error)
-                            break;
+                            await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });  
                         }
                         const user = JSON.parse(body);
                         welcomeMessage = `Hi ${user.first_name}! I\'m your friendly neighborhood birthday bot🧁🎂 .\n
@@ -81,6 +81,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                             `Today is your birthday! Happy birthday!🧁🎂 ` :
                             `There are ${days} days to your next birthday🧁🎂 ` 
                         });
+                        await sendMessage(sender_id, { text: '🎈' });
                     } else {
                         typingAction(sender_id);
                         await sendMessage(sender_id, { text: `Sorry, I think you entered an invalid date, Try again!` });
@@ -89,6 +90,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                 else if(noReplies.includes(text)) {
                     typingAction(sender_id);
                     await sendMessage(sender_id, { text:'Goodbye 👋'});
+                    await sendMessage(sender_id, { text: '🎈' })
                 }
                 else {
                     typingAction(sender_id);
@@ -115,6 +117,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                                 `Today is your birthday! Happy birthday!` :
                                 `There are ${days} days to your next birthday` 
                             });
+                            await sendMessage(sender_id, { text: '🎈' })
                             break;
                         } else {
                             typingAction(sender_id);
@@ -124,6 +127,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                     case `No`:
                         typingAction(sender_id);
                         await sendMessage(sender_id, { text: 'Goodbye 👋'});
+                        await sendMessage(sender_id, { text: '🎈' })
                         break;
                     default:
                         typingAction(sender_id);
