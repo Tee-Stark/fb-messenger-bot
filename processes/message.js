@@ -26,7 +26,6 @@ let noReplies = [
 
 module.exports = messageProcess = async (_event) => {
     try {
-        if(!_event.message.is_echo) {
             let birthday, days;
             const sender_id = _event.sender.id;
             const message = _event.message;
@@ -102,8 +101,6 @@ module.exports = messageProcess = async (_event) => {
                         break;
                 }
             }
-
-        }
     } catch(error) {
         logger.error(error);
     }
