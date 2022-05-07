@@ -6,7 +6,7 @@ const sendMessage = (receipientId, message) => {
     return new Promise((resolve, reject) => {
         request({
             url: 'https://graph.facebook.com/v13.0/me/messages',
-            query: {
+            qs: {
                 access_token: PAGE_ACCESS_TOKEN
             },
             method: 'POST',
@@ -32,7 +32,7 @@ const sendMessage = (receipientId, message) => {
 const typingAction = (receipientId) => {
     request({
         url: 'https://graph.facebook.com/v13.0/me/messages',
-        query: {
+        qs: {
             access_token: PAGE_ACCESS_TOKEN
         },
         method: 'POST',
