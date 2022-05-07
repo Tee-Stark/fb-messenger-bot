@@ -26,44 +26,77 @@ let noReplies = [
 
 module.exports = messageProcess = async (sender_id, message) => {
     try {
-            let birthday, days;
+            var text, days;
             logger.info(`Message received from ${sender_id}`);
             logger.info(message);
-            if(message.text && isDate(message.text)) {
-                birthday = message.text;
-                typingAction(sender_id);
-                await sendMessage(sender_id, { text:'Would you like to know how many days until your next birthday?' });
-            }  
-            if(message.text) {  
-                if(message.text.toLowerCase() === 'hi' || message.text.toLowerCase() === 'hello') {
-                    typingAction(sender_id);
-                    await sendMessage(sender_id, { text:'Hi there! I\'m your friendly neighborhood birthday bot. I can help you find out how many days until your next birthday. Let\'s Go!.' });
+            if(message.text) {
+                text = message.text.toLowerCase();
+                
+                if(text === 'hi' || text === 'hello') {
+                    request({
+                        url: `https://graph.facebook.com/v13.0/${sender_id}`,
+                        qs: {
+                            access_token: PAGE_ACCESS_TOKEN,
+                            fields: 'first_name'
+                        },
+                        method: 'GET'
+                    }, async (error, response, body) => {
+                        let welcomeMessage = '';
+                        if (error) {
+                            logger.error(error)
+                            break;
+                        } else if (response.body.error) {
+                            logger.error(response.body.error)
+                            break;
+                        }
+                        const user = JSON.parse(body);
+                        welcomeMessage = `Hi ${user.first_name}! I\'m your friendly neighborhood birthday bot🧁🎂 .\n
+                                          I can help you find out how many days until your next birthday. Let\'s Go!.`;
+                        let questionOne = {
+                            text: 'What is your birthdate? (YYYY-MM-DD)',
+                            quick_replies: [
+                                {
+                                    content_type: 'text',
+                                    title: 'Today',
+                                    payload: 'Today'
+                                }
+                            ]
+                        }
+                        typingAction(sender_id);
+                        await sendMessage(sender_id, { text:welcomeMessage });
+                        await sendMessage(sender_id, questionOne);                   
+                    })
                 }
-                if(yesReplies.includes(message.text.toLowerCase())) {
-                    typingAction(sender_id);
+                else if(isDate(text)) {
+                    birthday = message.text;
                     days = nextBirthday(birthday);
+                    typingAction(sender_id);
+                    await sendMessage(sender_id, { text:'Would you like to know how many days until your next birthday?' });
+                }
+                else if(yesReplies.includes(text)) {
+                    typingAction(sender_id);
                     if(days !== -1) {
                         typingAction(sender_id);
                         await sendMessage(sender_id, { text: days === 0 ? 
-                            `Today is your birthday! Happy birthday!` :
-                            `There are ${days} days to your next birthday` 
+                            `Today is your birthday! Happy birthday!🧁🎂 ` :
+                            `There are ${days} days to your next birthday🧁🎂 ` 
                         });
                     } else {
                         typingAction(sender_id);
                         await sendMessage(sender_id, { text: `Sorry, I think you entered an invalid date, Try again!` });
                     }
                 }
-                else if(noReplies.includes(message.text.toLowerCase())) {
+                else if(noReplies.includes(text)) {
                     typingAction(sender_id);
                     await sendMessage(sender_id, { text:'Goodbye 👋'});
                 }
-                // else {
-                //     typingAction(sender_id);
-                //     await sendMessage(sender_id, { text:'Sorry, I don\'t understand.' });
-                //     await sendMessage(sender_id, { text:'Please try again.' });
-                // }
+                else {
+                    typingAction(sender_id);
+                    await sendMessage(sender_id, { text:'Sorry, I don\'t understand.' });
+                    await sendMessage(sender_id, { text:'Please try again.' });
+                }
             }                
-            if(message.quick_reply) {
+            else if(message.quick_reply) {
                 logger.info(`Quick reply received from ${sender_id}`);
                 logger.info(message.quick_reply);
                 switch(message.quick_reply.payload) {
