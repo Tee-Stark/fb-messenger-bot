@@ -19,7 +19,8 @@ const nextBirthday = (birthday) => {
     const nextBirthday = new Date(year, month - 1, day);
     nextBirthday.setFullYear(today.getFullYear());
     const diff = nextBirthday - today;
-    console.log(diff);
+    // console.log(diff);
+    // check if birthday has passed for the current year
     if(diff < 0) {
         year = today.getFullYear() + 1;
         nextBirthday.setFullYear(year);
@@ -29,4 +30,5 @@ const nextBirthday = (birthday) => {
     return Math.ceil(diff / (1000 * 60 * 60 * 24));
 }
 
-console.log(nextBirthday('2020-02-20'));
+// console.log(nextBirthday('2020-02-20'));
+module.exports = { nextBirthday };
