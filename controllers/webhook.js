@@ -1,4 +1,4 @@
-// const messageProcess = require('../processes/message.js');
+const messageProcess = require('../processes/message.js');
 const logger = require('../config/logger');
 const { VERIFY_TOKEN } = require('../config/constants');
 
@@ -8,11 +8,21 @@ const webhook = async (req, res) => {
         // Checks this is an event from a page subscription
         if (body.object === 'page') {
             body.entry.forEach(entry => {
-                let webhook_event = entry.messaging[0];
+                let webhook_event = entry.messaging;
                 console.log(webhook_event);
-                // if(webhook_event.message) {
-                //     messageProcess(webhook_event);
-                // }
+                webhook_event.forEach(event => {
+                    // Get the sender PSID
+                    let sender_psid = event.sender.id;
+                    // Check if the event is a message or postback
+                    if (event.message && event.message.text) {
+                        // Handle message
+                        await messageProcess(sender_psid, event.message);
+                    } else if (event.postback && event.postback.payload) {
+                        // Handle postback
+                        // messageProcess(sender_psid, event.postback);
+                    }
+                }
+                );
             });
             return res.status(200).send('EVENT_RECEIVED');
         } else {
