@@ -57,11 +57,11 @@ module.exports = messageProcess = async (sender_id, message) => {
                     typingAction(sender_id);
                     await sendMessage(sender_id, { text:'Goodbye 👋'});
                 }
-                else {
-                    typingAction(sender_id);
-                    await sendMessage(sender_id, { text:'Sorry, I don\'t understand.' });
-                    await sendMessage(sender_id, { text:'Please try again.' });
-                }
+                // else {
+                //     typingAction(sender_id);
+                //     await sendMessage(sender_id, { text:'Sorry, I don\'t understand.' });
+                //     await sendMessage(sender_id, { text:'Please try again.' });
+                // }
             }                
             if(message.quick_reply) {
                 logger.info(`Quick reply received from ${sender_id}`);
