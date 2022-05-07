@@ -24,11 +24,9 @@ let noReplies = [
     'no, it\'s fine',
 ];
 
-module.exports = messageProcess = async (_event) => {
+module.exports = messageProcess = async (sender_id, message) => {
     try {
             let birthday, days;
-            const sender_id = _event.sender.id;
-            const message = _event.message;
             logger.info(`Message received from ${sender_id}`);
             logger.info(message);
             if(message.text && isDate(message.text)) {
