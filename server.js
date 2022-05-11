@@ -3,8 +3,10 @@ const logger = require('./config/logger');
 const connectDB = require('./config/db');
 
 const { PORT } = require('./config/constants');
+const { ConnectRedis } = require('./config/redisConnect');
 
 const server = app.listen(PORT, async () => {
+    await ConnectRedis();
     await connectDB();
     logger.info(`
         $$$$$$##########$$$$$$$$$$########
