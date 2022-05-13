@@ -1,5 +1,9 @@
-// const { get } = require("request");
+const { getSummary, getById, getAllMessages } = require('../controllers/message');
 
-get('/messages')
-get('messages/:id')
-get('/summary')
+const router = require('express').Router()
+
+router.get('/messages', getAllMessages);
+router.get('messages/:id', getById);
+router.get('/summary', getSummary);
+
+module.exports = router;

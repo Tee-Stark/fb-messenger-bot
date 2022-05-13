@@ -1,8 +1,8 @@
-const { createNewMessage, getMessages, getMessageById } = require('../services/message')
+const { getMessages, getMessageById } = require('../services/message')
 const logger = require('../config/logger')
 
 
-const getMessages = async (req, res) => {
+const getAllMessages = async (req, res) => {
     try {
         const messages = await getMessages("all");
         return res.status(200).json({
@@ -57,7 +57,7 @@ const getById = async (req, res) => {
 }
 
 module.exports = {
-    getMessages,
+    getAllMessages,
     getSummary,
     getById
 }

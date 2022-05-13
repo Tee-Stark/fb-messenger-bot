@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { NODE_ENV } = require('./config/constants');
 const morgan = require('morgan');
+const messageRoutes = require('./routes/message')
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 require('./routes/webhook')(app);
 
+app.use('/', messageRoutes)
 if(NODE_ENV === 'development') {
     app.use(morgan('dev'));
 } else {
