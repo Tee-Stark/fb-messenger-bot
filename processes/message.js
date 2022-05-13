@@ -49,7 +49,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                             messages: [text]
                         }
                         welcomeMessage = botReplies.start;
-                        if(createNewMessage(msg)) {
+                        if(await createNewMessage(msg)) {
                             await typingAction(userId);
                             await sendMessage(userId, welcomeMessage);
                             await typingAction(userId)
@@ -64,7 +64,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                 }
                 else if(isDate(text) && state === "birthday") {
                     userBirthday = text;
-                    if(createNewMessage(userBirthday)) {
+                    if(await createNewMessage(userBirthday)) {
                         await typingAction(sender_id);
                         await sendMessage(sender_id, botReplies.days_to_birthday);
                         const updateState = await setUserState(userId, "days_to_birthday");
@@ -77,7 +77,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                 else if(yesReplies.includes(text) && state === "days_to_birthday") {
                     days = nextBirthday(days);
                     if(days !== -1) {
-                        if(createNewMessage(text)){
+                        if(await createNewMessage(text)){
                             await typingAction(userId);
                             await sendMessage(userId, botReplies.days);
                             await sendMessage(userId, botReplies.balloon);
@@ -95,7 +95,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                     }
                 }
                 else if(noReplies.includes(text) && state === "days_to_birthday") {
-                    if(createNewMessage(text)){
+                    if(await createNewMessage(text)){
                         await typingAction(userId);
                         await sendMessage(userId, botReplies.goodbye);
                         await sendMessage(userId, botReplies.balloon);
@@ -118,7 +118,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                 switch(message.quick_reply.payload) {
                     case 'today':
                         days = 0;
-                        if(createNewMessage(text)){
+                        if(await createNewMessage(text)){
                             await typingAction(userId);
                             await sendMessage(userId, botReplies.days);
                             await sendMessage(userId, botReplies.goodbye)
@@ -133,7 +133,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                         await typingAction(userId);
                         days = nextBirthday(birthday);
                         if(days !== -1) {
-                            if(createNewMessage(text)) {
+                            if(await createNewMessage(text)) {
                                 await typingAction(userId);
                                 await sendMessage(userId, botReplies.days);
                                 await sendMessage(userId, botReplies.balloon)
@@ -151,7 +151,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                             break;
                         }
                     case `no`:
-                        if(createNewMessage(text)) {
+                        if(await createNewMessage(text)) {
                             typingAction(userId);
                             await sendMessage(userId, botReplies.goodbye);
                             await sendMessage(userId, botReplies.balloon);
