@@ -30,25 +30,30 @@ const sendMessage = (receipientId, message) => {
 }
 
 const typingAction = (receipientId) => {
-    request({
-        url: 'https://graph.facebook.com/v13.0/me/messages',
-        qs: {
-            access_token: PAGE_ACCESS_TOKEN
-        },
-        method: 'POST',
-        json: {
-            recipient: {
-                id: receipientId
+    return new Promise((resolve, reject) => {
+        request({
+            url: 'https://graph.facebook.com/v13.0/me/messages',
+            qs: {
+                access_token: PAGE_ACCESS_TOKEN
             },
-            sender_action: 'typing_on'
-        }
-    }, (error, response, body) => {
-        if (error) {
-            logger.error(error)
-        } else if (response.body.error) {
-            logger.error(response.body.error)
-        }
-    });
+            method: 'POST',
+            json: {
+                recipient: {
+                    id: receipientId
+                },
+                sender_action: 'typing_on'
+            }
+        }, (error, response, body) => {
+            if (error) {
+                logger.error(error)
+                reject(error)
+            } else if (response.body.error) {
+                logger.error(response.body.error)
+                reject(error)
+            }
+            resolve(body)
+        });
+    })
 }
 
 
