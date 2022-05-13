@@ -20,4 +20,4 @@ exports.ConnectRedis = async () => {
   }
 };
 
-// exports.RedisClient = redisCl;
+exports.RedisClient = redisCl;
