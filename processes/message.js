@@ -3,39 +3,26 @@ const logger = require("../config/logger");
 const { isDate } = require("../utils/dateUtil");
 const { sendMessage, typingAction } = require("../utils/sendMessage");
 const { nextBirthday } = require("../utils/birthday");
-const { createUser, getUser, addBirthday, getBirthday } = require("../services/User");
 const { PAGE_ACCESS_TOKEN } = require("../config/constants");
-const { create } = require('../models/user');
+const { getUserState, setUserState } = require('../services/state');
+const { createNewMessage } = require('../services/message');
+const { botReplies, yesReplies, noReplies } = require('../utils/replies') 
 
-let yesReplies = [
-    'yes',
-    'yes, please',
-    'sure',
-    'yeah',
-    'yup',
-    'ok',
-    'okay',
-];
-
-let noReplies = [
-    'no',
-    'no, thanks',
-    'nope',
-    'nah',
-    'naw',
-    'no thanks',
-    'no it\'s fine',
-    'no, it\'s fine',
-];
+let userBirthday = ''; // to hold user birthday value
+let userId = '';
 
 module.exports = messageProcess = async (sender_id, message) => {
     try {
-            let text, days;
+            let text;
+            // log message data in console
             logger.info(`Message received from ${sender_id}`);
             logger.info(message);
+            /**Process message received */
+            let userId = sender_id;
+            let state = getUserState(userId);
             if(message.text) {
                 text = message.text.toLowerCase();
-                if(text === 'hi' || text === 'hello') {
+                if(text === 'hi' || text === 'hey' || text === 'hello' && state === "start") {
                     request({
                         url: `https://graph.facebook.com/v13.0/${sender_id}`,
                         qs: {
@@ -47,108 +34,137 @@ module.exports = messageProcess = async (sender_id, message) => {
                         let welcomeMessage = '';
                         if (error) {
                             logger.error(error)
-                            await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });
+                            await sendMessage(sender_id, botReplies.internalError);
                         } else if (response.body.error) {
                             logger.error(response.body.error)
-                            await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });  
+                            await sendMessage(sender_id, botReplies.internalError);  
                         }
                         const user = JSON.parse(body);
-                        let userExists;
-                        userExists = await getUser(sender_id);
-                        if(!userExists) {
-                            let userSaved = await createUser(sender_id, user.first_name);
-                            if(!userSaved) {
-                                await sendMessage(sender_id, { text:'Sorry, I think something is wrong.😢 😢 😢' });
-                            }
-                            userExists = userSaved;
+                        logger.info(user)
+                        userName = user.first_name;
+                        // message object
+                        const msg = {
+                            userId,
+                            userName,
+                            messages: [text]
                         }
-                        logger.info(userExists);
-                        welcomeMessage = `Hi ${user.first_name}! I\'m your friendly neighborhood birthday bot🧁🎂 .\n
-                                          I can help you find out how many days until your next birthday. Let\'s Go!.`;
-                        let questionOne = {
-                            text: 'What is your birthdate? (YYYY-MM-DD)',
-                            quick_replies: [
-                                {
-                                    content_type: 'text',
-                                    title: 'Today',
-                                    payload: 'Today'
-                                }
-                            ]
-                        }
-                        typingAction(sender_id);
-                        await sendMessage(sender_id, { text:welcomeMessage });
-                        await sendMessage(sender_id, questionOne);                   
+                        welcomeMessage = botReplies.start;
+                        if(createNewMessage(msg)) {
+                            await typingAction(userId);
+                            await sendMessage(userId, welcomeMessage);
+                            await typingAction(userId)
+                            await sendMessage(userId, botReplies.ask_birthday);
+                            const updateState = await setUserState(userId, "birthday");
+                            logger.info(updateState)
+                        } else {
+                            await typingAction(userId)
+                            await sendMessage(userId, botReplies.internalError)
+                        }            
                     })
                 }
-                else if(isDate(text)) {
-                    birthday = message.text;
-                    const birthdaySaved = await addBirthday(sender_id, birthday);
-                    logger.info(birthdaySaved);
-                    typingAction(sender_id);
-                    await sendMessage(sender_id, { text:'Would you like to know how many days until your next birthday?' });
-                }
-                else if(yesReplies.includes(text)) {
-                    typingAction(sender_id);
-                    days = await getBirthday(sender_id);
-                    days = nextBirthday(days);
-                    if(days !== -1) {
-                        typingAction(sender_id);
-                        await sendMessage(sender_id, { text: days === 0 ? 
-                            `Today is your birthday! Happy birthday!🧁🎂 ` :
-                            `There are ${days} days to your next birthday🧁🎂 ` 
-                        });
-                        await sendMessage(sender_id, { text: '🎈' });
+                else if(isDate(text) && state === "birthday") {
+                    userBirthday = text;
+                    if(createNewMessage(userBirthday)) {
+                        await typingAction(sender_id);
+                        await sendMessage(sender_id, botReplies.days_to_birthday);
+                        const updateState = await setUserState(userId, "days_to_birthday");
+                        logger.info(updateState)
                     } else {
-                        typingAction(sender_id);
-                        await sendMessage(sender_id, { text: `Sorry, I think you entered an invalid date, Try again!` });
+                        await typingAction(userId);
+                        await sendMessage(userId, botReplies.internalError)
                     }
                 }
-                else if(noReplies.includes(text)) {
-                    typingAction(sender_id);
-                    await sendMessage(sender_id, { text:'Goodbye 👋'});
-                    await sendMessage(sender_id, { text: '🎈' })
+                else if(yesReplies.includes(text) && state === "days_to_birthday") {
+                    days = nextBirthday(days);
+                    if(days !== -1) {
+                        if(createNewMessage(text)){
+                            await typingAction(userId);
+                            await sendMessage(userId, botReplies.days);
+                            await sendMessage(userId, botReplies.balloon);
+                            await typingAction(userId);
+                            await sendMessage(userId, botReplies.goodbye)
+                            const updateState = await setUserState(userId, "goodbye");
+                            logger.info(updateState);
+                        } else {
+                            await typingAction(userId);
+                            await sendMessage(userId, botReplies.internalError)
+                        }
+                    } else {
+                        await typingAction(userId);
+                        await sendMessage(userId, botReplies.invalidDate);
+                    }
+                }
+                else if(noReplies.includes(text) && state === "days_to_birthday") {
+                    if(createNewMessage(text)){
+                        await typingAction(userId);
+                        await sendMessage(userId, botReplies.goodbye);
+                        await sendMessage(userId, botReplies.balloon);
+                        const updateState = await setUserState(userId, "goodbye")
+                        logger.info(updateState)
+                    } else {
+                        await typingAction(userId)
+                        await sendMessage(userId, botReplies.internalError)
+                    }
                 }
                 else {
-                    typingAction(sender_id);
-                    await sendMessage(sender_id, { text:'Sorry, I don\'t understand.' });
-                    await sendMessage(sender_id, { text:'Please try again.' });
+                    await typingAction(userId);
+                    await sendMessage(userId, botReplies.invalidReply);
                 }
             }                
             else if(message.quick_reply) {
-                logger.info(`Quick reply received from ${sender_id}`);
+                logger.info(`Quick reply received from ${userId}`);
                 logger.info(message.quick_reply);
+                text = message.quick_reply.text
                 switch(message.quick_reply.payload) {
-                    case 'Today':
-                        typingAction(sender_id);
-                        await sendMessage(sender_id, { text:'Today is your birthday!' });
-                        await sendMessage(sender_id, { text:'Happy birthday!' });
-                        await sendMessage(sender_id, { text: '🎈' });
-                        break;
-                    case `Yes`:
-                        typingAction(sender_id);
-                        days = nextBirthday(birthday);
-                        if(days !== -1) {
-                            typingAction(sender_id);
-                            await sendMessage(sender_id, { text: days === 0 ? 
-                                `Today is your birthday! Happy birthday!` :
-                                `There are ${days} days to your next birthday` 
-                            });
-                            await sendMessage(sender_id, { text: '🎈' })
+                    case 'today':
+                        days = 0;
+                        if(createNewMessage(text)){
+                            await typingAction(userId);
+                            await sendMessage(userId, botReplies.days);
+                            await sendMessage(userId, botReplies.goodbye)
+                            const updateState = await setUserState(userId, "goodbye")
+                            logger.info(updateState)
                             break;
                         } else {
+                            await typingAction(userId);
+                            await sendMessage(userId, botReplies.internalError)
+                        }
+                    case `yes`:
+                        await typingAction(userId);
+                        days = nextBirthday(birthday);
+                        if(days !== -1) {
+                            if(createNewMessage(text)) {
+                                await typingAction(userId);
+                                await sendMessage(userId, botReplies.days);
+                                await sendMessage(userId, botReplies.balloon)
+                                await sendMessage(userId, botReplies.goodbye)
+                                const updateState = setUserState(userId, "goodbye")
+                                logger.info(updateState);
+                                break;
+                            } else {
+                                await typingAction(userId);
+                                await sendMessage(userId, botReplies.internalError)
+                            }
+                        } else {
                             typingAction(sender_id);
-                            await sendMessage(sender_id, { text: `Sorry, I think you entered an invalid date, Try again!` });
+                            await sendMessage(userId, botReplies.invalidDate);
                             break;
                         }
-                    case `No`:
-                        typingAction(sender_id);
-                        await sendMessage(sender_id, { text: 'Goodbye 👋'});
-                        await sendMessage(sender_id, { text: '🎈' })
-                        break;
+                    case `no`:
+                        if(createNewMessage(text)) {
+                            typingAction(userId);
+                            await sendMessage(userId, botReplies.goodbye);
+                            await sendMessage(userId, botReplies.balloon);
+                            const updateState = await setUserState(userId, "goodbye");
+                            logger.info(updateState)
+                            break;
+                        } else {
+                            await typingAction(userId);
+                            await sendMessage(userId, botReplies.internalError)
+                        }
                     default:
-                        typingAction(sender_id);
-                        await sendMessage(sender_id, { text:'Sorry, I don\'t understand.' });
-                        await sendMessage(sender_id, { text:'Please try again.' });
+                        await typingAction(sender_id);
+                        await sendMessage(sender_id, botReplies.invalidReply);
                         break;
                 }
             }
