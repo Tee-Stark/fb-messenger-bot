@@ -9,18 +9,23 @@ const createNewMessage = async (message) => {
             // if user doesn't exist previously, create new user
             const newMessage = await Message.create(message);
             return newMessage;
+        } else if(typeof message === String) {
+            const updatedMessage = await Message.findOneAndUpdate(
+            { userId: message.userId }, 
+            { $push: { messages: message } }, 
+            { new: true }
+            );
+            return updatedMessage;
+        }
+        else if(typeof message === Object) {
+            const updatedMessage = await Message.findOneAndUpdate(
+            { userId: message.userId },
+            { $push: { messages: { $each: message.messages } } },
+            { new: true }
+            );
+            return updatedMessage;
         } else {
-            // else if user exists already, just add  the message's text to the user's messages
-            if(typeof message === String) {
-                const updatedMessage = await Message.findOneAndUpdate(
-                { userId: message.userId }, 
-                { $push: { messages: message } }, 
-                { new: true }
-                );
-                return updatedMessage;
-            } else {
-                throw new Error("Invalid message content");
-            }
+            throw new Error("Invalid message content");
         }
     } catch (err) {
         logger.error(err)
