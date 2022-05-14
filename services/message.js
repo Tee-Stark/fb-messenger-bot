@@ -9,7 +9,7 @@ const createNewMessage = async (message) => {
             // if user doesn't exist previously, create new user
             const newMessage = await Message.create(message);
             return newMessage;
-        } else if(typeof message === String) {
+        } else if(typeof message === 'string') {
             const updatedMessage = await Message.findOneAndUpdate(
             { userId: message.userId }, 
             { $push: { messages: message } }, 
@@ -17,7 +17,7 @@ const createNewMessage = async (message) => {
             );
             return updatedMessage;
         }
-        else if(typeof message === Object) {
+        else if(typeof message === 'object') {
             const updatedMessage = await Message.findOneAndUpdate(
             { userId: message.userId },
             { $push: { messages: { $each: message.messages } } },
