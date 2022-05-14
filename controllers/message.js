@@ -20,7 +20,8 @@ const getAllMessages = async (req, res) => {
 
 const getSummary = async (req, res) => {
     try {
-        const summary = getMessages("summary");
+        const summary = await getMessages("summary");
+        logger.info(summary);
         return res.status(200).json({
             status: 'success',
             data: summary
@@ -36,7 +37,7 @@ const getSummary = async (req, res) => {
 const getById = async (req, res) => {
     try {
         const id = req.params.id;
-        const message = getMessageById(id);
+        const message = await getMessageById(id);
         if(!message) {
             return res.status(400).json({
                 status: 'error',
