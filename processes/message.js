@@ -20,6 +20,7 @@ module.exports = messageProcess = async (sender_id, message) => {
             /**Process message received */
             let userId = sender_id;
             let state = getUserState(userId);
+            logger.info(state)
             if(message.text) {
                 text = message.text.toLowerCase();
                 if(text === 'hi' || text === 'hey' || text === 'hello' && state === "start") {
