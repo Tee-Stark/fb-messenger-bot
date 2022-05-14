@@ -2,7 +2,9 @@ const Redis = require('redis');
 const { REDIS_URL } = require('./constants');
 const logger = require('./logger');
 
-const redisCl = Redis.createClient(REDIS_URL);
+const redisCl = Redis.createClient({
+  url: REDIS_URL,
+});
 
 exports.ConnectRedis = async () => {
   try {

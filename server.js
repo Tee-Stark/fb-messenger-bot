@@ -2,7 +2,7 @@ const app = require('./app');
 const logger = require('./config/logger');
 const connectDB = require('./config/db');
 
-const { PORT } = require('./config/constants');
+const { PORT, NODE_ENV } = require('./config/constants');
 const { ConnectRedis } = require('./config/redisConnect');
 
 const server = app.listen(PORT, async () => {
@@ -13,7 +13,7 @@ const server = app.listen(PORT, async () => {
             $$$$$$##########$$$$$$$$$$########
             Server is running on port ${PORT}
             ######$$$$$$$$$$$#########$$$$$$$$$
-            Server running on ${process.env.NODE_ENV} mode
+            Server running on ${NODE_ENV} mode
         `);
     } catch (err) {
         logger.error(err)
