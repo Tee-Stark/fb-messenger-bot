@@ -14,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 require('./routes/webhook')(app);
 
 app.use('/api/', messageRoutes);
+
 if(NODE_ENV === 'development') {
     app.use(morgan('dev'));
 } else {
