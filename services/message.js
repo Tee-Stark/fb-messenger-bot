@@ -22,6 +22,7 @@ const createNewMessage = async (message) => {
             }
         }
     } catch (err) {
+        logger.error(err)
         throw err;
     }
 }
@@ -44,6 +45,7 @@ const getMessages = async (mode) => {
             throw new Error("invalid mode")
         }
     } catch (err) {
+        logger.error(err)
         throw err;
     }
 }
@@ -53,6 +55,7 @@ const getMessageById = async (id) => {
         const message = await Message.findById(id);
         return message;
     } catch (err) {
+        logger.error(err)
         throw err;
     }
 }

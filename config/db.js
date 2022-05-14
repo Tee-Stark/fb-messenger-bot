@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const logger = require('./logger');
-const { DB_URL } = process.env
+const { DB_URL } = require('./constants');
 
 module.exports = async () => {
     try {
-        await mongoose.connect(DB_URL, {
+        mongoose.connect(DB_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
