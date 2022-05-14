@@ -19,7 +19,7 @@ module.exports = messageProcess = async (sender_id, message) => {
             logger.info(message);
             /**Process message received */
             userId = sender_id;
-            let state = getUserState(userId);
+            let state = await getUserState(userId);
             logger.info(state)
             if(message.text) {
                 text = message.text.toLowerCase();
@@ -139,7 +139,7 @@ module.exports = messageProcess = async (sender_id, message) => {
                                 await sendMessage(userId, botReplies.days);
                                 await sendMessage(userId, botReplies.balloon)
                                 await sendMessage(userId, botReplies.goodbye)
-                                const updateState = setUserState(userId, "goodbye")
+                                const updateState = await setUserState(userId, "goodbye")
                                 logger.info(updateState);
                                 break;
                             } else {
