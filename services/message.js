@@ -5,7 +5,7 @@ const createNewMessage = async (message) => {
     try {
         // check if user already exists
         const user = await Message.findOne({ userId: message.userId });
-        if(user === null){
+        if(!user){
             // if user doesn't exist previously, create new user
             const newMessage = await Message.create(message);
             return newMessage;
